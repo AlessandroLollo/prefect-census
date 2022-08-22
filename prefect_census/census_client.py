@@ -160,10 +160,10 @@ class CensusClient:
         if wait_for_sync_run_completed:
 
             wait_time = 10
-            sync_run_working = True
+            sync_run_completed = False
             sync_run_id = response["data"]["sync_run_id"]
 
-            while sync_run_working:
+            while not sync_run_completed:
 
                 sync_run_response = self.get_sync_run(sync_run_id=sync_run_id)
                 sync_run_status = sync_run_response["data"]["status"]
@@ -172,5 +172,6 @@ class CensusClient:
                     sleep(wait_time)
                 elif sync_run_status == "completed":
                     response = sync_run_response
+                    sync_run_completed = True
 
         return response

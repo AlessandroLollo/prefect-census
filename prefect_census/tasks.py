@@ -1,24 +1,25 @@
 """This is an example tasks module"""
+from typing import Dict
+
 from prefect import task
 
-
-@task
-def hello_prefect_census() -> str:
-    """
-    Sample task that says hello!
-
-    Returns:
-        A greeting for your collection
-    """
-    return "Hello, prefect-census!"
+from prefect_census.census_client import CensusClient
+from prefect_census.credentials import CensusCredentials
 
 
 @task
-def goodbye_prefect_census() -> str:
+def trigger_sync_run(
+    credentials: CensusCredentials,
+    sync_id: int,
+    force_full_sync: bool = False,
+    wait_for_sync_run_completed: bool = False,
+) -> Dict:
     """
-    Sample task that says goodbye!
-
-    Returns:
-        A farewell for your collection
+    TODO
     """
-    return "Goodbye, prefect-census!"
+    client = CensusClient(credentials=credentials)
+    return client.trigger_sync_run(
+        sync_id=sync_id,
+        force_full_sync=force_full_sync,
+        wait_for_sync_run_completed=wait_for_sync_run_completed,
+    )
