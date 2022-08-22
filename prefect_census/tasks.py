@@ -1,4 +1,8 @@
-"""This is an example tasks module"""
+"""
+Collection of tasks to interact with Census APIs.
+More details about Census APIs can be found in the [official docs]
+    (https://docs.getcensus.com/basics/api).
+"""
 from typing import Dict
 
 from prefect import task
@@ -15,7 +19,15 @@ def trigger_sync_run(
     wait_for_sync_run_completed: bool = False,
 ) -> Dict:
     """
-    TODO
+    This task triggers a new Sync run and, optionally, wait for it to complete.
+
+    Args:
+        credentials: Census credentials.
+        sync_id: The identifier of the Sync.
+        force_full_sync: Whether to run the sync in full refresh or not.
+            Defaults to `False`.
+        wait_for_sync_run_completed: Whether to wait for the sync
+            run to complete or not. Defaults to `False`.
     """
     client = CensusClient(credentials=credentials)
     return client.trigger_sync_run(
