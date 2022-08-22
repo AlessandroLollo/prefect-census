@@ -1,1 +1,1 @@
-::: prefect_census.tasks
+::: prefect_census.census_client
