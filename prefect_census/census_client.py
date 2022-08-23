@@ -23,6 +23,16 @@ class CensusClient:
     # Census API version
     __CENSUS_API_VERSION = "v1"
 
+    # Minimum wait time between API calls
+    __CENSUS_MIN_POLL_STATUS_EVERY_N_SECONDS = 10  # seconds
+
+    @staticmethod
+    def get_min_poll_status_every_n_seconds():
+        """
+        Return the default wait time between API calls
+        """
+        return CensusClient.__CENSUS_MIN_POLL_STATUS_EVERY_N_SECONDS
+
     def __init__(self, credentials: CensusCredentials) -> None:
         self.credentials = credentials
 
@@ -131,6 +141,7 @@ class CensusClient:
         sync_id: int,
         force_full_sync: bool = False,
         wait_for_sync_run_completed: bool = False,
+        poll_status_every_n_seconds: int = __CENSUS_MIN_POLL_STATUS_EVERY_N_SECONDS,
     ) -> Dict:
         """
         Trigger a new Sync Run given the Sync identifier.
@@ -141,6 +152,8 @@ class CensusClient:
                 Defaults to `False`.
             wait_for_sync_run_completed: Whether to wait for the sync run
                 to complete or not. Defaults to `False`.
+            poll_status_every_n_seconds: The number of seconds to wait
+                between API calls.
 
         Returns:
             If `wait_for_sync_run_completed` is `False` then returns the JSON response
@@ -160,7 +173,6 @@ class CensusClient:
 
         if wait_for_sync_run_completed:
 
-            wait_time = 10
             sync_run_completed = False
             sync_run_id = response["data"]["sync_run_id"]
 
@@ -170,7 +182,7 @@ class CensusClient:
                 sync_run_status = sync_run_response["data"]["status"]
 
                 if sync_run_status == "working":
-                    sleep(wait_time)
+                    sleep(poll_status_every_n_seconds)
                 elif sync_run_status == "completed":
                     response = sync_run_response
                     sync_run_completed = True

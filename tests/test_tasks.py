@@ -83,3 +83,53 @@ def test_trigger_sync_with_wait_succeed():
         "status": "success",
         "data": {"status": "completed", "records_processed": 1},
     }
+
+
+@responses.activate
+def test_trigger_sync_with_non_default_wait_succeed():
+    sync_id = 1234
+    trigger_sync_api_url = f"https://app.getcensus.com/api/v1/syncs/{sync_id}/trigger"
+
+    sync_run_id = 1234567890
+    sync_run_api_url = f"https://app.getcensus.com/api/v1/sync_runs/{sync_run_id}"
+
+    responses.add(
+        method=responses.POST,
+        url=trigger_sync_api_url,
+        status=200,
+        json={"status": "success", "data": {"sync_run_id": sync_run_id}},
+    )
+
+    responses.add(
+        method=responses.GET,
+        url=sync_run_api_url,
+        status=200,
+        json={"status": "success", "data": {"status": "working"}},
+    )
+
+    responses.add(
+        method=responses.GET,
+        url=sync_run_api_url,
+        status=200,
+        json={
+            "status": "success",
+            "data": {"status": "completed", "records_processed": 1},
+        },
+    )
+
+    @flow(name="non_default_wait_flow")
+    def test_flow():
+        creds = CensusCredentials(access_token=SecretStr("foo"))
+        return trigger_sync_run(
+            credentials=creds,
+            sync_id=sync_id,
+            wait_for_sync_run_completed=True,
+            poll_status_every_n_seconds=1,
+        )
+
+    response = test_flow()
+
+    assert response == {
+        "status": "success",
+        "data": {"status": "completed", "records_processed": 1},
+    }

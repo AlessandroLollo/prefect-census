@@ -17,6 +17,7 @@ def trigger_sync_run(
     sync_id: int,
     force_full_sync: bool = False,
     wait_for_sync_run_completed: bool = False,
+    poll_status_every_n_seconds: int = CensusClient.get_min_poll_status_every_n_seconds(),  # noqa
 ) -> Dict:
     """
     This task triggers a new Sync run and, optionally, wait for it to complete.
@@ -28,10 +29,13 @@ def trigger_sync_run(
             Defaults to `False`.
         wait_for_sync_run_completed: Whether to wait for the sync
             run to complete or not. Defaults to `False`.
+        poll_status_every_n_seconds: The number of seconds to wait
+            between API calls.
     """
     client = CensusClient(credentials=credentials)
     return client.trigger_sync_run(
         sync_id=sync_id,
         force_full_sync=force_full_sync,
         wait_for_sync_run_completed=wait_for_sync_run_completed,
+        poll_status_every_n_seconds=poll_status_every_n_seconds,
     )
