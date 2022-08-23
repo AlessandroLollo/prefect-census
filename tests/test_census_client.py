@@ -149,7 +149,6 @@ def test_trigger_sync_run_succeed():
 def test_trigger_sync_with_wait_failed_sync_run_raises():
     sync_id = 1234
     trigger_sync_api_url = f"https://app.getcensus.com/api/v1/syncs/{sync_id}/trigger"
-    params = {"force_full_sync": False}
 
     sync_run_id = 1234567890
     sync_run_api_url = f"https://app.getcensus.com/api/v1/sync_runs/{sync_run_id}"
@@ -159,7 +158,6 @@ def test_trigger_sync_with_wait_failed_sync_run_raises():
         url=trigger_sync_api_url,
         status=200,
         json={"status": "success", "data": {"sync_run_id": sync_run_id}},
-        match=[matchers.query_param_matcher(params)],
     )
 
     responses.add(
@@ -177,12 +175,11 @@ def test_trigger_sync_with_wait_failed_sync_run_raises():
         creds = CensusCredentials(access_token=SecretStr("foo"))
         client = CensusClient(credentials=creds)
 
-        client.trigger_sync_run(sync_id=sync_id, wait_for_sync_run_completed=True)
+        client.trigger_sync_run(
+            sync_id=sync_id, wait_for_sync_run_completed=True, force_full_sync=False
+        )
 
-    assert (
-        responses.assert_call_count(f"{trigger_sync_api_url}?force_full_sync=False", 1)
-        is True
-    )
+    assert responses.assert_call_count(trigger_sync_api_url, 1) is True
     assert responses.assert_call_count(sync_run_api_url, 1) is True
 
 
@@ -190,7 +187,6 @@ def test_trigger_sync_with_wait_failed_sync_run_raises():
 def test_trigger_sync_run_with_wait_succeed():
     sync_id = 1234
     trigger_sync_api_url = f"https://app.getcensus.com/api/v1/syncs/{sync_id}/trigger"
-    params = {"force_full_sync": False}
 
     sync_run_id = 1234567890
     sync_run_api_url = f"https://app.getcensus.com/api/v1/sync_runs/{sync_run_id}"
@@ -200,7 +196,6 @@ def test_trigger_sync_run_with_wait_succeed():
         url=trigger_sync_api_url,
         status=200,
         json={"status": "success", "data": {"sync_run_id": sync_run_id}},
-        match=[matchers.query_param_matcher(params)],
     )
 
     responses.add(
@@ -218,10 +213,7 @@ def test_trigger_sync_run_with_wait_succeed():
 
     client.trigger_sync_run(sync_id=sync_id, wait_for_sync_run_completed=True)
 
-    assert (
-        responses.assert_call_count(f"{trigger_sync_api_url}?force_full_sync=False", 1)
-        is True
-    )
+    assert responses.assert_call_count(trigger_sync_api_url, 1) is True
     assert responses.assert_call_count(sync_run_api_url, 1) is True
 
 
@@ -229,7 +221,6 @@ def test_trigger_sync_run_with_wait_succeed():
 def test_trigger_sync_run_with_wait_after_wait_succeed():
     sync_id = 1234
     trigger_sync_api_url = f"https://app.getcensus.com/api/v1/syncs/{sync_id}/trigger"
-    params = {"force_full_sync": False}
 
     sync_run_id = 1234567890
     sync_run_api_url = f"https://app.getcensus.com/api/v1/sync_runs/{sync_run_id}"
@@ -239,7 +230,6 @@ def test_trigger_sync_run_with_wait_after_wait_succeed():
         url=trigger_sync_api_url,
         status=200,
         json={"status": "success", "data": {"sync_run_id": sync_run_id}},
-        match=[matchers.query_param_matcher(params)],
     )
 
     responses.add(
@@ -264,8 +254,5 @@ def test_trigger_sync_run_with_wait_after_wait_succeed():
 
     client.trigger_sync_run(sync_id=sync_id, wait_for_sync_run_completed=True)
 
-    assert (
-        responses.assert_call_count(f"{trigger_sync_api_url}?force_full_sync=False", 1)
-        is True
-    )
+    assert responses.assert_call_count(trigger_sync_api_url, 1) is True
     assert responses.assert_call_count(sync_run_api_url, 2) is True
