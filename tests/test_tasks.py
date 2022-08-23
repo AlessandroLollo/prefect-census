@@ -2,7 +2,6 @@ import pytest
 import responses
 from prefect import flow
 from pydantic import SecretStr
-from responses import matchers
 
 from prefect_census.credentials import CensusCredentials
 from prefect_census.exceptions import CensusAPIFailureException
@@ -43,7 +42,6 @@ def test_trigger_sync_no_wait_succeed():
 def test_trigger_sync_with_wait_succeed():
     sync_id = 1234
     trigger_sync_api_url = f"https://app.getcensus.com/api/v1/syncs/{sync_id}/trigger"
-    params = {"force_full_sync": False}
 
     sync_run_id = 1234567890
     sync_run_api_url = f"https://app.getcensus.com/api/v1/sync_runs/{sync_run_id}"
@@ -53,7 +51,6 @@ def test_trigger_sync_with_wait_succeed():
         url=trigger_sync_api_url,
         status=200,
         json={"status": "success", "data": {"sync_run_id": sync_run_id}},
-        match=[matchers.query_param_matcher(params)],
     )
 
     responses.add(

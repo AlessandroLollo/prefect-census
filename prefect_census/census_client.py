@@ -5,6 +5,7 @@ from time import sleep
 from typing import Dict, Optional
 
 from requests import Session
+from requests.auth import HTTPBasicAuth
 
 from prefect_census.credentials import CensusCredentials
 from prefect_census.exceptions import CensusAPIFailureException
@@ -58,12 +59,10 @@ class CensusClient:
         Returns:
             Session object configured with the proper headers.
         """
-        access_token = self.credentials.access_token.get_secret_value()
         session = Session()
-        session.headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json",
-        }
+        session.auth = HTTPBasicAuth(
+            username="bearer", password=self.credentials.access_token.get_secret_value()
+        )
 
         return session
 
@@ -113,8 +112,9 @@ class CensusClient:
             The JSON response of the [Census Sync Run API]
                 (https://docs.getcensus.com/basics/api/sync-runs#get-sync_runs-id)
         """
+        url = self.__get_sync_run_url(sync_run_id=sync_run_id)
         response = self.__call_api(
-            api_url=self.__get_sync_run_url(sync_run_id=sync_run_id),
+            api_url=url,
             params=None,
             http_method="GET",
         )
@@ -150,9 +150,10 @@ class CensusClient:
                 [Census Sync Run API]
                     (https://docs.getcensus.com/basics/api/sync-runs#get-sync_runs-id).
         """
-        params = {"force_full_sync": force_full_sync}
+        params = {"force_full_sync": force_full_sync} if force_full_sync else None
+        url = self.__get_trigger_sync_run_url(sync_id=sync_id)
         response = self.__call_api(
-            api_url=self.__get_trigger_sync_run_url(sync_id=sync_id),
+            api_url=url,
             params=params,
             http_method="POST",
         )
